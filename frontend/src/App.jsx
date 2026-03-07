@@ -305,7 +305,12 @@ export default function App() {
                                         {loading ? (
                                             <span>Generating{dots}</span>
                                         ) : (
-                                            <span>◆ Generate Content</span>
+                                            <span>
+                                                <span className="generate-icon">
+                                                    ◆
+                                                </span>
+                                                Generate Content
+                                            </span>
                                         )}
                                     </button>
                                 </div>
@@ -549,7 +554,7 @@ export default function App() {
         }
         .nav-inner { width: 100%; padding: 0 60px; height: 60px; display: flex; align-items: center; gap: 32px; box-sizing: border-box; }
         .logo { display: flex; align-items: center; gap: 8px; }
-        .logo-icon { color: var(--accent); font-size: 14px; }
+        .logo-icon { color: var(--accent); font-size: 28px; }
         .logo-text { font-family: var(--font-display); font-weight: 700; font-size: 17px; letter-spacing: -0.3px; }
         .nav-tabs { display: flex; gap: 4px; flex: 1; }
         .nav-tab {
@@ -695,6 +700,7 @@ export default function App() {
         .generate-btn:hover:not(.disabled):not(.loading) { opacity: 0.9; transform: translateY(-1px); }
         .generate-btn.disabled { opacity: 0.35; cursor: not-allowed; }
         .generate-btn.loading { background: var(--surface2); color: var(--text2); cursor: wait; }
+        .generate-icon { font-size: 20px; margin-right: 8px; vertical-align: middle; }
 
         /* RESULT */
         .result-view { animation: fadeIn 0.3s ease; }
