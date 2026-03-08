@@ -1,15 +1,47 @@
 import { useState, useEffect } from "react";
 
 const CONTENT_TYPES = [
-    { id: "blog", label: "Blog Post", icon: "✍️", desc: "Long-form article with structure", placeholder: "e.g. The future of remote work in 2025" },
-    { id: "product", label: "Product Description", icon: "🛍️", desc: "Compelling copy that converts", placeholder: "e.g. Wireless noise-cancelling headphones" },
-    { id: "social", label: "Social Media", icon: "📱", desc: "Engaging posts for any platform", placeholder: "e.g. Announcing our new app launch" },
-    { id: "email", label: "Email Campaign", icon: "📧", desc: "Professional email that gets opened", placeholder: "e.g. Black Friday sale promotion" },
+    {
+        id: "blog",
+        label: "Blog Post",
+        icon: "✍️",
+        desc: "Long-form article with structure",
+        placeholder: "e.g. The future of remote work in 2025",
+    },
+    {
+        id: "product",
+        label: "Product Description",
+        icon: "🛍️",
+        desc: "Compelling copy that converts",
+        placeholder: "e.g. Wireless noise-cancelling headphones",
+    },
+    {
+        id: "social",
+        label: "Social Media",
+        icon: "📱",
+        desc: "Engaging posts for any platform",
+        placeholder: "e.g. Announcing our new app launch",
+    },
+    {
+        id: "email",
+        label: "Email Campaign",
+        icon: "📧",
+        desc: "Professional email that gets opened",
+        placeholder: "e.g. Black Friday sale promotion",
+    },
 ];
 
-const TONES = ["Professional", "Casual", "Persuasive", "Inspirational", "Witty"];
+const TONES = [
+    "Professional",
+    "Casual",
+    "Persuasive",
+    "Inspirational",
+    "Witty",
+];
 
-const API_URL = import.meta.env.VITE_API_URL || "https://your-api-gateway.execute-api.us-east-1.amazonaws.com/prod";
+const API_URL =
+    import.meta.env.VITE_API_URL ||
+    "https://your-api-gateway.execute-api.us-east-1.amazonaws.com/prod";
 
 async function generateContent({ type, topic, tone, keywords }) {
     const response = await fetch(`${API_URL}/generate`, {
@@ -48,7 +80,10 @@ export default function App() {
 
     useEffect(() => {
         if (!loading) return;
-        const interval = setInterval(() => setDots((d) => (d.length >= 3 ? "" : d + ".")), 400);
+        const interval = setInterval(
+            () => setDots((d) => (d.length >= 3 ? "" : d + ".")),
+            400,
+        );
         return () => clearInterval(interval);
     }, [loading]);
 
@@ -99,10 +134,17 @@ export default function App() {
         setLoading(true);
         setResult(null);
         try {
-            const data = await generateContent({ type: contentType, topic, tone, keywords });
+            const data = await generateContent({
+                type: contentType,
+                topic,
+                tone,
+                keywords,
+            });
             setResult(data);
         } catch (e) {
-            setResult({ error: "Generation failed. Check your API configuration." });
+            setResult({
+                error: "Generation failed. Check your API configuration.",
+            });
         }
         setLoading(false);
     };
@@ -134,10 +176,22 @@ export default function App() {
                 <div className="confirm-overlay">
                     <div className="confirm-box">
                         <p className="confirm-title">🗑 Remove this item?</p>
-                        <p className="confirm-sub">This will permanently delete it from history.</p>
+                        <p className="confirm-sub">
+                            This will permanently delete it from history.
+                        </p>
                         <div className="confirm-actions">
-                            <button className="confirm-cancel" onClick={cancelDelete}>Cancel</button>
-                            <button className="confirm-ok" onClick={confirmDeleteItem}>Yes, delete</button>
+                            <button
+                                className="confirm-cancel"
+                                onClick={cancelDelete}
+                            >
+                                Cancel
+                            </button>
+                            <button
+                                className="confirm-ok"
+                                onClick={confirmDeleteItem}
+                            >
+                                Yes, delete
+                            </button>
                         </div>
                     </div>
                 </div>
@@ -149,9 +203,20 @@ export default function App() {
                         <span className="logo-text">ContentAI</span>
                     </div>
                     <div className="nav-tabs">
-                        <button className={`nav-tab ${activeTab === "generate" ? "active" : ""}`} onClick={() => setActiveTab("generate")}>Generate</button>
-                        <button className={`nav-tab ${activeTab === "history" ? "active" : ""}`} onClick={() => setActiveTab("history")}>
-                            History {history.length > 0 && <span className="badge">{history.length}</span>}
+                        <button
+                            className={`nav-tab ${activeTab === "generate" ? "active" : ""}`}
+                            onClick={() => setActiveTab("generate")}
+                        >
+                            Generate
+                        </button>
+                        <button
+                            className={`nav-tab ${activeTab === "history" ? "active" : ""}`}
+                            onClick={() => setActiveTab("history")}
+                        >
+                            History{" "}
+                            {history.length > 0 && (
+                                <span className="badge">{history.length}</span>
+                            )}
                         </button>
                     </div>
                     <div className="nav-status">
@@ -167,95 +232,253 @@ export default function App() {
                         {!result ? (
                             <>
                                 <header className="hero">
-                                    <div className="hero-tag">Powered by Llama 3.3 · Serverless</div>
-                                    <h1 className="hero-title">Create content that<br /><span className="hero-accent">actually converts</span></h1>
-                                    <p className="hero-sub">Blog posts, product descriptions, social media — generated in seconds.</p>
+                                    <div className="hero-tag">
+                                        Powered by Llama 3.3 · Serverless
+                                    </div>
+                                    <h1 className="hero-title">
+                                        Create content that
+                                        <br />
+                                        <span className="hero-accent">
+                                            actually converts
+                                        </span>
+                                    </h1>
+                                    <p className="hero-sub">
+                                        Blog posts, product descriptions, social
+                                        media — generated in seconds.
+                                    </p>
                                 </header>
 
                                 <div className="card-main">
                                     <div className="section">
-                                        <div className="section-label"><span className="step-num">01</span><span>Choose content type</span></div>
+                                        <div className="section-label">
+                                            <span className="step-num">01</span>
+                                            <span>Choose content type</span>
+                                        </div>
                                         <div className="type-grid">
                                             {CONTENT_TYPES.map((t) => (
-                                                <button key={t.id} className={`type-card ${contentType === t.id ? "selected" : ""}`} onClick={() => { setContentType(t.id); setStep(2); }}>
-                                                    <span className="type-icon">{t.icon}</span>
-                                                    <span className="type-label">{t.label}</span>
-                                                    <span className="type-desc">{t.desc}</span>
+                                                <button
+                                                    key={t.id}
+                                                    className={`type-card ${contentType === t.id ? "selected" : ""}`}
+                                                    onClick={() => {
+                                                        setContentType(t.id);
+                                                        setStep(2);
+                                                    }}
+                                                >
+                                                    <span className="type-icon">
+                                                        {t.icon}
+                                                    </span>
+                                                    <span className="type-label">
+                                                        {t.label}
+                                                    </span>
+                                                    <span className="type-desc">
+                                                        {t.desc}
+                                                    </span>
                                                 </button>
                                             ))}
                                         </div>
                                     </div>
 
-                                    <div className={`section ${step < 2 ? "dimmed" : ""}`}>
-                                        <div className="section-label"><span className="step-num">02</span><span>Describe your topic</span></div>
-                                        <textarea className="textarea" rows={3} placeholder={selectedType?.placeholder || "What should we write about?"} value={topic} onChange={(e) => { setTopic(e.target.value); if (e.target.value) setStep(3); }} disabled={step < 2} />
+                                    <div
+                                        className={`section ${step < 2 ? "dimmed" : ""}`}
+                                    >
+                                        <div className="section-label">
+                                            <span className="step-num">02</span>
+                                            <span>Describe your topic</span>
+                                        </div>
+                                        <textarea
+                                            className="textarea"
+                                            rows={3}
+                                            placeholder={
+                                                selectedType?.placeholder ||
+                                                "What should we write about?"
+                                            }
+                                            value={topic}
+                                            onChange={(e) => {
+                                                setTopic(e.target.value);
+                                                if (e.target.value) setStep(3);
+                                            }}
+                                            disabled={step < 2}
+                                        />
                                     </div>
 
-                                    <div className={`section ${step < 3 ? "dimmed" : ""}`}>
-                                        <div className="section-label"><span className="step-num">03</span><span>Customize tone & keywords</span></div>
+                                    <div
+                                        className={`section ${step < 3 ? "dimmed" : ""}`}
+                                    >
+                                        <div className="section-label">
+                                            <span className="step-num">03</span>
+                                            <span>
+                                                Customize tone & keywords
+                                            </span>
+                                        </div>
                                         <div className="options-row">
                                             <div className="option-group">
-                                                <label className="option-label">Tone</label>
+                                                <label className="option-label">
+                                                    Tone
+                                                </label>
                                                 <div className="tone-chips">
                                                     {TONES.map((t) => (
-                                                        <button key={t} className={`chip ${tone === t ? "active" : ""}`} onClick={() => setTone(t)} disabled={step < 3}>{t}</button>
+                                                        <button
+                                                            key={t}
+                                                            className={`chip ${tone === t ? "active" : ""}`}
+                                                            onClick={() =>
+                                                                setTone(t)
+                                                            }
+                                                            disabled={step < 3}
+                                                        >
+                                                            {t}
+                                                        </button>
                                                     ))}
                                                 </div>
                                             </div>
                                             <div className="option-group">
-                                                <label className="option-label">Keywords (optional)</label>
-                                                <input className="input" placeholder="SEO, innovation, growth..." value={keywords} onChange={(e) => setKeywords(e.target.value)} disabled={step < 3} />
+                                                <label className="option-label">
+                                                    Keywords (optional)
+                                                </label>
+                                                <input
+                                                    className="input"
+                                                    placeholder="SEO, innovation, growth..."
+                                                    value={keywords}
+                                                    onChange={(e) =>
+                                                        setKeywords(
+                                                            e.target.value,
+                                                        )
+                                                    }
+                                                    disabled={step < 3}
+                                                />
                                             </div>
                                         </div>
                                     </div>
 
-                                    <button className={`generate-btn ${loading ? "loading" : ""} ${!contentType || !topic ? "disabled" : ""}`} onClick={handleGenerate} disabled={loading || !contentType || !topic}>
-                                        {loading ? <span>Generating{dots}</span> : <span><span className="generate-icon">◆</span>Generate Content</span>}
+                                    <button
+                                        className={`generate-btn ${loading ? "loading" : ""} ${!contentType || !topic ? "disabled" : ""}`}
+                                        onClick={handleGenerate}
+                                        disabled={
+                                            loading || !contentType || !topic
+                                        }
+                                    >
+                                        {loading ? (
+                                            <span>Generating{dots}</span>
+                                        ) : (
+                                            <span>
+                                                <span className="generate-icon">
+                                                    ◆
+                                                </span>
+                                                Generate Content
+                                            </span>
+                                        )}
                                     </button>
                                 </div>
                             </>
                         ) : (
                             <div className="result-view">
                                 <div className="result-header">
-                                    <button className="back-btn" onClick={reset}>← New generation</button>
+                                    <button
+                                        className="back-btn"
+                                        onClick={reset}
+                                    >
+                                        ← New generation
+                                    </button>
                                     <div className="result-meta">
-                                        <span className="meta-chip">{selectedType?.icon} {selectedType?.label}</span>
-                                        <span className="meta-chip">🎯 {tone}</span>
+                                        <span className="meta-chip">
+                                            {selectedType?.icon}{" "}
+                                            {selectedType?.label}
+                                        </span>
+                                        <span className="meta-chip">
+                                            🎯 {tone}
+                                        </span>
                                     </div>
                                 </div>
 
                                 <div className="result-card">
                                     <div className="result-toolbar">
-                                        <span className="result-title">Generated Content</span>
+                                        <span className="result-title">
+                                            Generated Content
+                                        </span>
                                         <div className="toolbar-actions">
-                                            <button className="tool-btn" onClick={copyToClipboard}>{copied ? "✓ Copied!" : "Copy"}</button>
-                                            <button className="tool-btn" onClick={() => {
-                                                const blob = new Blob([result.content], { type: "text/plain" });
-                                                const url = URL.createObjectURL(blob);
-                                                const a = document.createElement("a");
-                                                a.href = url; a.download = `content-${Date.now()}.txt`; a.click();
-                                            }}>Download</button>
+                                            <button
+                                                className="tool-btn"
+                                                onClick={copyToClipboard}
+                                            >
+                                                {copied ? "✓ Copied!" : "Copy"}
+                                            </button>
+                                            <button
+                                                className="tool-btn"
+                                                onClick={() => {
+                                                    const blob = new Blob(
+                                                        [result.content],
+                                                        { type: "text/plain" },
+                                                    );
+                                                    const url =
+                                                        URL.createObjectURL(
+                                                            blob,
+                                                        );
+                                                    const a =
+                                                        document.createElement(
+                                                            "a",
+                                                        );
+                                                    a.href = url;
+                                                    a.download = `content-${Date.now()}.txt`;
+                                                    a.click();
+                                                }}
+                                            >
+                                                Download
+                                            </button>
                                         </div>
                                     </div>
                                     {result.error ? (
-                                        <div className="error-msg">{result.error}</div>
+                                        <div className="error-msg">
+                                            {result.error}
+                                        </div>
                                     ) : (
                                         <div className="result-content">
-                                            {result.content.split("\n").map((line, i) =>
-                                                line.startsWith("# ") ? <h1 key={i}>{line.slice(2)}</h1> :
-                                                line.startsWith("## ") ? <h2 key={i}>{line.slice(3)}</h2> :
-                                                line.startsWith("### ") ? <h3 key={i}>{line.slice(4)}</h3> :
-                                                line.startsWith("**") && line.endsWith("**") ? <p key={i}><strong>{line.slice(2, -2)}</strong></p> :
-                                                line.trim() === "" ? <br key={i} /> :
-                                                <p key={i}>{line}</p>
-                                            )}
+                                            {result.content
+                                                .split("\n")
+                                                .map((line, i) =>
+                                                    line.startsWith("# ") ? (
+                                                        <h1 key={i}>
+                                                            {line.slice(2)}
+                                                        </h1>
+                                                    ) : line.startsWith(
+                                                          "## ",
+                                                      ) ? (
+                                                        <h2 key={i}>
+                                                            {line.slice(3)}
+                                                        </h2>
+                                                    ) : line.startsWith(
+                                                          "### ",
+                                                      ) ? (
+                                                        <h3 key={i}>
+                                                            {line.slice(4)}
+                                                        </h3>
+                                                    ) : line.startsWith("**") &&
+                                                      line.endsWith("**") ? (
+                                                        <p key={i}>
+                                                            <strong>
+                                                                {line.slice(
+                                                                    2,
+                                                                    -2,
+                                                                )}
+                                                            </strong>
+                                                        </p>
+                                                    ) : line.trim() === "" ? (
+                                                        <br key={i} />
+                                                    ) : (
+                                                        <p key={i}>{line}</p>
+                                                    ),
+                                                )}
                                         </div>
                                     )}
                                 </div>
 
                                 <div className="result-actions">
-                                    <button className="gen-again-btn" onClick={handleGenerate} disabled={loading}>
-                                        {loading ? `Regenerating${dots}` : "↻ Regenerate"}
+                                    <button
+                                        className="gen-again-btn"
+                                        onClick={handleGenerate}
+                                        disabled={loading}
+                                    >
+                                        {loading
+                                            ? `Regenerating${dots}`
+                                            : "↻ Regenerate"}
                                     </button>
                                 </div>
                             </div>
@@ -264,8 +487,14 @@ export default function App() {
                 ) : (
                     <div className="history-view">
                         <div className="history-header">
-                            <h2 className="history-title">Generation History</h2>
-                            <button className="refresh-btn" onClick={loadHistory} disabled={historyLoading}>
+                            <h2 className="history-title">
+                                Generation History
+                            </h2>
+                            <button
+                                className="refresh-btn"
+                                onClick={loadHistory}
+                                disabled={historyLoading}
+                            >
                                 {historyLoading ? "Loading..." : "↻ Refresh"}
                             </button>
                         </div>
@@ -277,8 +506,16 @@ export default function App() {
                         ) : history.length === 0 ? (
                             <div className="empty-state">
                                 <span className="empty-icon">📂</span>
-                                <p>No generations yet. Create your first piece of content!</p>
-                                <button className="empty-btn" onClick={() => setActiveTab("generate")}>Start Generating</button>
+                                <p>
+                                    No generations yet. Create your first piece
+                                    of content!
+                                </p>
+                                <button
+                                    className="empty-btn"
+                                    onClick={() => setActiveTab("generate")}
+                                >
+                                    Start Generating
+                                </button>
                             </div>
                         ) : (
                             <div className="history-list">
@@ -286,16 +523,49 @@ export default function App() {
                                     <div key={item.id} className="history-card">
                                         <div className="history-card-header">
                                             <div className="history-meta">
-                                                <span className="h-chip">{CONTENT_TYPES.find((t) => t.id === item.type)?.icon} {item.type}</span>
-                                                <span className="h-chip">{item.tone}</span>
+                                                <span className="h-chip">
+                                                    {
+                                                        CONTENT_TYPES.find(
+                                                            (t) =>
+                                                                t.id ===
+                                                                item.type,
+                                                        )?.icon
+                                                    }{" "}
+                                                    {item.type}
+                                                </span>
+                                                <span className="h-chip">
+                                                    {item.tone}
+                                                </span>
                                             </div>
-                                            <span className="h-date">{new Date(item.createdAt).toLocaleString()}</span>
+                                            <span className="h-date">
+                                                {new Date(
+                                                    item.createdAt,
+                                                ).toLocaleString()}
+                                            </span>
                                         </div>
                                         <p className="h-topic">{item.topic}</p>
-                                        <p className="h-preview">{item.content?.slice(0, 120)}...</p>
+                                        <p className="h-preview">
+                                            {item.content?.slice(0, 120)}...
+                                        </p>
                                         <div className="h-actions">
-                                            <button className="h-copy-btn" onClick={() => navigator.clipboard.writeText(item.content)}>Copy content</button>
-                                            <button className="h-delete-btn" onClick={() => askDelete(item.id)}>🗑 Remove</button>
+                                            <button
+                                                className="h-copy-btn"
+                                                onClick={() =>
+                                                    navigator.clipboard.writeText(
+                                                        item.content,
+                                                    )
+                                                }
+                                            >
+                                                Copy content
+                                            </button>
+                                            <button
+                                                className="h-delete-btn"
+                                                onClick={() =>
+                                                    askDelete(item.id)
+                                                }
+                                            >
+                                                🗑 Remove
+                                            </button>
                                         </div>
                                     </div>
                                 ))}
