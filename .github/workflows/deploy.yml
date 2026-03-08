@@ -75,6 +75,7 @@ jobs:
             --capabilities CAPABILITY_IAM \
             --no-confirm-changeset \
             --no-fail-on-empty-changeset \
+            --resolve-s3 \
             --parameter-overrides \
               OpenAIApiKey=${{ secrets.OPENAI_API_KEY }} \
               OpenAIModel=gpt-3.5-turbo \
