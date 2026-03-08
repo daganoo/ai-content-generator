@@ -48,7 +48,7 @@ Resources:
     Properties:
       StageName: prod
       Cors:
-        AllowMethods: "'GET,POST,OPTIONS'"
+        AllowMethods: "'GET,POST,DELETE,OPTIONS'"
         AllowHeaders: "'Content-Type,Authorization'"
         AllowOrigin: "'*'"
 
@@ -93,6 +93,18 @@ Resources:
             RestApiId: !Ref ContentAPI
             Path: /history
             Method: get
+        HistoryDeleteAPI:
+          Type: Api
+          Properties:
+            RestApiId: !Ref ContentAPI
+            Path: /history/{id}
+            Method: delete
+        HistoryDeleteOptionsAPI:
+          Type: Api
+          Properties:
+            RestApiId: !Ref ContentAPI
+            Path: /history/{id}
+            Method: options
 
   # S3 Bucket for Frontend
   FrontendBucket:
