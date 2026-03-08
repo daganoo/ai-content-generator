@@ -1,47 +1,42 @@
-const { DynamoDBClient, QueryCommand } = require("@aws-sdk/client-dynamodb");
+const { DynamoDBClient, ScanCommand } = require("@aws-sdk/client-dynamodb");
 const { unmarshall } = require("@aws-sdk/util-dynamodb");
 
-const dynamo = new DynamoDBClient({ region: process.env.AWS_REGION || "us-east-1" });
+const dynamo = new DynamoDBClient({ region: process.env.AWS_REGION || "eu-west-3" });
 const TABLE_NAME = process.env.DYNAMODB_TABLE || "content-generator-history";
 
-exports.handler = async (event) => {
-  const headers = {
-    "Content-Type": "application/json",
-    "Access-Control-Allow-Origin": process.env.ALLOWED_ORIGIN || "*",
-    "Access-Control-Allow-Headers": "Content-Type,Authorization",
-    "Access-Control-Allow-Methods": "GET,OPTIONS",
-  };
+const CORS_HEADERS = {
+  "Access-Control-Allow-Origin": "*",
+  "Access-Control-Allow-Headers": "Content-Type",
+  "Access-Control-Allow-Methods": "GET,OPTIONS",
+  "Content-Type": "application/json",
+};
 
-  if (event.httpMethod === "OPTIONS") return { statusCode: 200, headers, body: "" };
+exports.handler = async (event) => {
+  if (event.httpMethod === "OPTIONS") {
+    return { statusCode: 200, headers: CORS_HEADERS, body: "" };
+  }
 
   try {
-    const userId = event.queryStringParameters?.userId || "anonymous";
-    const limit = parseInt(event.queryStringParameters?.limit || "20");
-
-    const result = await dynamo.send(new QueryCommand({
+    const result = await dynamo.send(new ScanCommand({
       TableName: TABLE_NAME,
-      IndexName: "userId-createdAt-index",
-      KeyConditionExpression: "userId = :uid",
-      ExpressionAttributeValues: { ":uid": { S: userId } },
-      ScanIndexForward: false, // newest first
-      Limit: Math.min(limit, 50),
+      Limit: 50,
     }));
 
-    const items = (result.Items || []).map(unmarshall).map(({ id, type, topic, tone, createdAt, tokens, cost }) => ({
-      id, type, topic, tone, createdAt, tokens, cost,
-    }));
+    const items = (result.Items || [])
+      .map((item) => unmarshall(item))
+      .sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt));
 
     return {
       statusCode: 200,
-      headers,
-      body: JSON.stringify({ items, count: items.length }),
+      headers: CORS_HEADERS,
+      body: JSON.stringify({ items }),
     };
-  } catch (error) {
-    console.error("History fetch error:", error);
+  } catch (err) {
+    console.error("History error:", err);
     return {
       statusCode: 500,
-      headers,
-      body: JSON.stringify({ error: "Failed to fetch history" }),
+      headers: CORS_HEADERS,
+      body: JSON.stringify({ error: "Failed to fetch history", items: [] }),
     };
   }
 };
