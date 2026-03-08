@@ -1,0 +1,206 @@
+AWSTemplateFormatVersion: '2010-09-09'
+Transform: AWS::Serverless-2016-10-31
+Description: AI Content Generator - Serverless Stack
+
+Parameters:
+  OpenAIApiKey:
+    Type: String
+    NoEcho: true
+    Description: Your OpenAI API Key
+  OpenAIModel:
+    Type: String
+    Default: gpt-3.5-turbo
+    Description: OpenAI model to use
+  MaxTokens:
+    Type: Number
+    Default: 1000
+    Description: Max tokens per generation
+
+Globals:
+  Function:
+    Runtime: nodejs18.x
+    Timeout: 30
+    MemorySize: 256
+
+Resources:
+
+  # ── DynamoDB ──────────────────────────────────────────
+  ContentHistoryTable:
+    Type: AWS::DynamoDB::Table
+    Properties:
+      TableName: content-generator-history
+      BillingMode: PAY_PER_REQUEST
+      AttributeDefinitions:
+        - AttributeName: id
+          AttributeType: S
+        - AttributeName: userId
+          AttributeType: S
+        - AttributeName: createdAt
+          AttributeType: S
+        - AttributeName: cacheKey
+          AttributeType: S
+      KeySchema:
+        - AttributeName: id
+          KeyType: HASH
+      GlobalSecondaryIndexes:
+        - IndexName: userId-createdAt-index
+          KeySchema:
+            - AttributeName: userId
+              KeyType: HASH
+            - AttributeName: createdAt
+              KeyType: RANGE
+          Projection:
+            ProjectionType: ALL
+        - IndexName: cache-index
+          KeySchema:
+            - AttributeName: cacheKey
+              KeyType: HASH
+          Projection:
+            ProjectionType: ALL
+      TimeToLiveSpecification:
+        AttributeName: ttl
+        Enabled: true
+
+  # ── Lambda Functions ───────────────────────────────────
+  GenerateFunction:
+    Type: AWS::Serverless::Function
+    Properties:
+      FunctionName: content-generator-generate
+      CodeUri: ../backend/lambda/generate/
+      Handler: index.handler
+      Description: Generate AI content using OpenAI
+      Environment:
+        Variables:
+          OPENAI_API_KEY: !Ref OpenAIApiKey
+          OPENAI_MODEL: !Ref OpenAIModel
+          MAX_TOKENS: !Ref MaxTokens
+          DYNAMODB_TABLE: !Ref ContentHistoryTable
+          ALLOWED_ORIGIN: "*"
+      Policies:
+        - DynamoDBCrudPolicy:
+            TableName: !Ref ContentHistoryTable
+      Events:
+        GenerateAPI:
+          Type: Api
+          Properties:
+            RestApiId: !Ref ContentAPI
+            Path: /generate
+            Method: POST
+        OptionsAPI:
+          Type: Api
+          Properties:
+            RestApiId: !Ref ContentAPI
+            Path: /generate
+            Method: OPTIONS
+
+  HistoryFunction:
+    Type: AWS::Serverless::Function
+    Properties:
+      FunctionName: content-generator-history
+      CodeUri: ../backend/lambda/history/
+      Handler: index.handler
+      Description: Fetch generation history from DynamoDB
+      Environment:
+        Variables:
+          DYNAMODB_TABLE: !Ref ContentHistoryTable
+          ALLOWED_ORIGIN: "*"
+      Policies:
+        - DynamoDBReadPolicy:
+            TableName: !Ref ContentHistoryTable
+      Events:
+        HistoryAPI:
+          Type: Api
+          Properties:
+            RestApiId: !Ref ContentAPI
+            Path: /history
+            Method: GET
+
+  # ── API Gateway ────────────────────────────────────────
+  ContentAPI:
+    Type: AWS::Serverless::Api
+    Properties:
+      Name: content-generator-api
+      StageName: prod
+      Cors:
+        AllowMethods: "'GET,POST,OPTIONS'"
+        AllowHeaders: "'Content-Type,Authorization'"
+        AllowOrigin: "'*'"
+
+  # ── S3 Frontend Bucket ─────────────────────────────────
+  FrontendBucket:
+    Type: AWS::S3::Bucket
+    Properties:
+      BucketName: !Sub "content-generator-frontend-${AWS::AccountId}"
+      WebsiteConfiguration:
+        IndexDocument: index.html
+        ErrorDocument: index.html
+      PublicAccessBlockConfiguration:
+        BlockPublicAcls: false
+        BlockPublicPolicy: false
+        IgnorePublicAcls: false
+        RestrictPublicBuckets: false
+
+  FrontendBucketPolicy:
+    Type: AWS::S3::BucketPolicy
+    Properties:
+      Bucket: !Ref FrontendBucket
+      PolicyDocument:
+        Statement:
+          - Effect: Allow
+            Principal:
+              CanonicalUser: !GetAtt CloudFrontOAI.S3CanonicalUserId
+            Action: s3:GetObject
+            Resource: !Sub "${FrontendBucket.Arn}/*"
+
+  # ── CloudFront ─────────────────────────────────────────
+  CloudFrontOAI:
+    Type: AWS::CloudFront::CloudFrontOriginAccessIdentity
+    Properties:
+      CloudFrontOriginAccessIdentityConfig:
+        Comment: content-generator-oai
+
+  CloudFrontDistribution:
+    Type: AWS::CloudFront::Distribution
+    Properties:
+      DistributionConfig:
+        Enabled: true
+        DefaultRootObject: index.html
+        PriceClass: PriceClass_100
+        Origins:
+          - Id: S3Origin
+            DomainName: !GetAtt FrontendBucket.RegionalDomainName
+            S3OriginConfig:
+              OriginAccessIdentity: !Sub "origin-access-identity/cloudfront/${CloudFrontOAI}"
+        DefaultCacheBehavior:
+          TargetOriginId: S3Origin
+          ViewerProtocolPolicy: redirect-to-https
+          CachePolicyId: 658327ea-f89d-4fab-a63d-7e88639e58f6 # CachingOptimized
+          Compress: true
+        CustomErrorResponses:
+          - ErrorCode: 403
+            ResponseCode: 200
+            ResponsePagePath: /index.html
+          - ErrorCode: 404
+            ResponseCode: 200
+            ResponsePagePath: /index.html
+
+Outputs:
+  APIGatewayURL:
+    Description: API Gateway endpoint URL
+    Value: !Sub "https://${ContentAPI}.execute-api.${AWS::Region}.amazonaws.com/prod"
+    Export:
+      Name: ContentGeneratorAPIURL
+
+  CloudFrontURL:
+    Description: CloudFront distribution URL
+    Value: !Sub "https://${CloudFrontDistribution.DomainName}"
+    Export:
+      Name: ContentGeneratorFrontendURL
+
+  DynamoDBTableName:
+    Description: DynamoDB table name
+    Value: !Ref ContentHistoryTable
+
+  FrontendBucketName:
+    Description: S3 bucket for frontend
+    Value: !Ref FrontendBucket
