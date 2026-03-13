@@ -579,7 +579,7 @@ export default function App() {
         * { margin: 0; padding: 0; box-sizing: border-box; }
         :root {
           --bg: #050509; --surface:rgb(13, 6, 16); --surface2: #15101f; --border: #221832;
-          --accent: #4c1d95; --accent2: #b91c5a; --text: #e8e8f0; --text2: #9b9bb5;
+          --accent:rgb(69, 26, 134); --accent2: #b91c5a; --text: #e8e8f0; --text2: #9b9bb5;
           --text3: #5f6074; --green: #34d399;
           --font-display: 'Syne', sans-serif; --font-body: 'DM Sans', sans-serif;
         }
