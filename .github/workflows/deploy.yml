@@ -77,8 +77,8 @@ jobs:
             --no-fail-on-empty-changeset \
             --resolve-s3 \
             --parameter-overrides \
-              OpenAIApiKey="${{ secrets.GROQ_API_KEY }}" \
-              OpenAIModel=gpt-3.5-turbo \
+              GroqApiKey="${{ secrets.GROQ_API_KEY }}" \
+              AIModel=llama-3.3-70b-versatile \
               MaxTokens=1000
 
           # Extract outputs
@@ -160,6 +160,3 @@ jobs:
           echo "|----------|-----|" >> $GITHUB_STEP_SUMMARY
           echo "| 🌐 Frontend | ${{ needs.deploy-backend.outputs.cloudfront-url }} |" >> $GITHUB_STEP_SUMMARY
           echo "| ⚡ API | ${{ needs.deploy-backend.outputs.api-url }} |" >> $GITHUB_STEP_SUMMARY
-
-
-         
