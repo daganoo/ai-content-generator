@@ -77,7 +77,7 @@ jobs:
             --no-fail-on-empty-changeset \
             --resolve-s3 \
             --parameter-overrides \
-              OpenAIApiKey=${{ secrets.OPENAI_API_KEY }} \
+              OpenAIApiKey="${{ secrets.GROQ_API_KEY }}" \
               OpenAIModel=gpt-3.5-turbo \
               MaxTokens=1000
 
@@ -160,3 +160,6 @@ jobs:
           echo "|----------|-----|" >> $GITHUB_STEP_SUMMARY
           echo "| 🌐 Frontend | ${{ needs.deploy-backend.outputs.cloudfront-url }} |" >> $GITHUB_STEP_SUMMARY
           echo "| ⚡ API | ${{ needs.deploy-backend.outputs.api-url }} |" >> $GITHUB_STEP_SUMMARY
+
+
+         
